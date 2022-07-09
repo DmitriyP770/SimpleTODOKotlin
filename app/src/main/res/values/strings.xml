@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SimpleTODOKotlin</string>
+    <string name="task">Что нужно сделать?</string>
 </resources>
