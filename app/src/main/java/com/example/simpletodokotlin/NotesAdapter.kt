@@ -9,9 +9,13 @@ import androidx.recyclerview.widget.RecyclerView
 
 class NotesAdapter : RecyclerView.Adapter<NotesAdapter.NotesViewHolder>() {
 
-    fun updateNotes (notes: ArrayList<Note>) {
-        this.notes = notes
+    fun updateNotes (notes: List<Note>) {
+        this.notes = notes as ArrayList<Note>
         notifyDataSetChanged()
+    }
+
+    fun getNotes(noteID: Int): Note{
+        return notes[noteID]
     }
 
     private var notes = ArrayList<Note>()

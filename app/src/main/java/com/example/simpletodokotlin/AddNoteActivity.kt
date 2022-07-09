@@ -2,6 +2,8 @@ package com.example.simpletodokotlin
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -12,11 +14,13 @@ class AddNoteActivity : AppCompatActivity() {
     private lateinit var lowPriorityRB: RadioButton
     private lateinit var medPriorityRB: RadioButton
     private lateinit var button: Button
-   private var db: DataBase = DataBase.getInstance()
+    private lateinit var db: NotesDataBase
+    private var handler:Handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_note)
+       db= NotesDataBase.getInstance(application)
         initViews()
         button.setOnClickListener(View.OnClickListener {
             saveNote()
@@ -36,8 +40,16 @@ class AddNoteActivity : AppCompatActivity() {
     private fun saveNote(){
        var text: String = editTextAddNote.text.toString().trim()
        var priority: Int =  getPriority()
-        var id: Int = 1515
-        db.addNote(Note(id,text,priority))
+
+        var thread : Thread = Thread(Runnable {
+            db.notesDAO().addNote(Note(0,text,priority))
+            handler.post(Runnable {
+                finish()
+            })
+
+        })
+        thread.start()
+
 
     }
 

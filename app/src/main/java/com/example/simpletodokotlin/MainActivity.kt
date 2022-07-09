@@ -1,8 +1,11 @@
 package com.example.simpletodokotlin
 
+import android.app.Application
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -17,16 +20,25 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity() {
     private lateinit var rvNotes: RecyclerView
     private lateinit var buttonAdd: FloatingActionButton
+    private lateinit var noteDB:NotesDataBase
 
-    private var db: DataBase = DataBase.getInstance()
+    private lateinit var db: DataBase
     private val notesAdapter = NotesAdapter()
+    //handler - is for UI thread interactions
+    private var handler:Handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        noteDB = NotesDataBase.getInstance(application)
         initViews()
+
         rvNotes.adapter = notesAdapter
         rvNotes.layoutManager = LinearLayoutManager(this)
+        noteDB.notesDAO().getNotes().observe(this, androidx.lifecycle.Observer {
+            it -> notesAdapter.updateNotes(it)
+
+        })
 
         buttonAdd.setOnClickListener(View.OnClickListener {
           Intent(this, AddNoteActivity::class.java).also { startActivity(it) }
@@ -48,8 +60,17 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     var position = viewHolder.adapterPosition
-                    db.removeNote(position)
-                    showNotes()
+                   // db.removeNote(position)
+
+                    var thread :Thread = Thread(Runnable {
+                        noteDB.notesDAO().deleteNote(notesAdapter.getNotes(position).id)
+                        handler.post(Runnable {
+                            showNotes()
+
+                        })
+
+                    })
+                    thread.start()
 
                 }
             })
@@ -70,7 +91,15 @@ class MainActivity : AppCompatActivity() {
         buttonAdd = findViewById(R.id.floatingActionButton)
     }
     private fun showNotes() {
-        notesAdapter.updateNotes(db.getNotes())
+
+        var thread:Thread = Thread(Runnable {
+            var notes: List<Note> = noteDB.notesDAO().getNotes()
+            handler.post(Runnable {
+                notesAdapter.updateNotes(notes)
+            })
+
+        })
+thread.start()
     }
 
 }
