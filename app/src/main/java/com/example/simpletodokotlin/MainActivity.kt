@@ -20,9 +20,9 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity() {
     private lateinit var rvNotes: RecyclerView
     private lateinit var buttonAdd: FloatingActionButton
-    private lateinit var noteDB:NotesDataBase
+//    private lateinit var noteDB:NotesDataBase
 
-    private lateinit var db: DataBase
+//    private lateinit var db: DataBase
     private val notesAdapter = NotesAdapter()
     //handler - is for UI thread interactions
     private var handler:Handler = Handler(Looper.getMainLooper())
@@ -30,15 +30,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        noteDB = NotesDataBase.getInstance(application)
+//        noteDB = NotesDataBase.getInstance(application)
         initViews()
+         var viewModel: MainActivityViewModel = MainActivityViewModel(application)
 
         rvNotes.adapter = notesAdapter
         rvNotes.layoutManager = LinearLayoutManager(this)
-        noteDB.notesDAO().getNotes().observe(this, androidx.lifecycle.Observer {
+        viewModel.data.observe(this, androidx.lifecycle.Observer {
             it -> notesAdapter.updateNotes(it)
-
         })
+//        noteDB.notesDAO().getNotes().observe(this, androidx.lifecycle.Observer {
+//            it -> notesAdapter.updateNotes(it)
+//
+//        })
 
         buttonAdd.setOnClickListener(View.OnClickListener {
           Intent(this, AddNoteActivity::class.java).also { startActivity(it) }
@@ -60,17 +64,17 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     var position = viewHolder.adapterPosition
-                   // db.removeNote(position)
+                    viewModel.deleteNote(notesAdapter.getNotes(position))
 
-                    var thread :Thread = Thread(Runnable {
-                        noteDB.notesDAO().deleteNote(notesAdapter.getNotes(position).id)
-                        handler.post(Runnable {
-                            showNotes()
-
-                        })
-
-                    })
-                    thread.start()
+//                    var thread :Thread = Thread(Runnable {
+//                        noteDB.notesDAO().deleteNote(notesAdapter.getNotes(position).id)
+////                        handler.post(Runnable {
+////                            showNotes()
+////
+////                        })
+//
+//                    })
+//                    thread.start()
 
                 }
             })
@@ -79,28 +83,25 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onResume() {
-        showNotes()
 
-        super.onResume()
+private fun showNotes(){
 
-    }
-
+}
     private fun initViews(){
         rvNotes = findViewById(R.id.rvNotes)
         buttonAdd = findViewById(R.id.floatingActionButton)
     }
-    private fun showNotes() {
-
-        var thread:Thread = Thread(Runnable {
-            var notes: List<Note> = noteDB.notesDAO().getNotes()
-            handler.post(Runnable {
-                notesAdapter.updateNotes(notes)
-            })
-
-        })
-thread.start()
-    }
+//    private fun showNotes() {
+//
+//        var thread:Thread = Thread(Runnable {
+//            var notes: List<Note> = noteDB.notesDAO().getNotes()
+//            handler.post(Runnable {
+//                notesAdapter.updateNotes(notes)
+//            })
+//
+//        })
+//thread.start()
+//    }
 
 }
 //Itemtouchhelper
