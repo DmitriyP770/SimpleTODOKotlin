@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 //        noteDB = NotesDataBase.getInstance(application)
         initViews()
-         var viewModel: MainActivityViewModel = MainActivityViewModel(application)
+         var viewModel: MainActivityViewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
 
         rvNotes.adapter = notesAdapter
         rvNotes.layoutManager = LinearLayoutManager(this)
@@ -84,9 +85,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-private fun showNotes(){
 
-}
     private fun initViews(){
         rvNotes = findViewById(R.id.rvNotes)
         buttonAdd = findViewById(R.id.floatingActionButton)
